@@ -70,25 +70,17 @@ class ENObserver:
             try:
                 await asyncio.wait_for(self._sig.wait(), 10)
                 self._sig.clear()
-                ui.show(self._ids)
-                continue
             except asyncio.TimeoutError:
-                now = time.time()
-                # print(f"== {len(self._ids)} covid identifiers in range ==")
-                aged = []
-                for k, v in self._ids.items():
-                    #     print(
-                    #         f"\tID: {k} from {v.address} RSSI: {v.rssi}dBm (last seen {int(now - v.last_ts)}sec ago)"
-                    #     )
-                    if int(now - v.last_ts) > 30:
-                        aged.append(k)
-                # print("\n")
-                for k in aged:
-                    v = self._ids.pop(k)
-                    print(
-                        f"\t - Removing ID: {k}, was active for {int(v.last_ts - v.first_ts)}sec"
-                    )
-                ui.show(self._ids)
+                pass
+
+            now = time.time()
+            aged = []
+            for k, v in self._ids.items():
+                if int(now - v.last_ts) > 30:
+                    aged.append(k)
+            for k in aged:
+                v = self._ids.pop(k)
+            ui.show(self._ids)
         ui.fin()
 
     async def stop(self):
