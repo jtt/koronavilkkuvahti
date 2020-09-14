@@ -46,6 +46,24 @@ class ENObserver:
                     el.address = en.address
                 el.last_ts = time.time()
 
+    def _is_bluewalker_running(self) -> bool:
+        if not self._runner:
+            return False
+        return self._runner.check() is None
+
+    def _print_bluewalker_error(self):
+        exitcode = None
+        if self._runner is not None:
+            exitcode = self._runner.check()
+            err = self._runner.get_output()
+            if exitcode is not None:
+                print(f"Bluewalker exited with {exitcode}:")
+                if err:
+                    for l in err:
+                        print(f"{l.strip()}")
+                else:
+                    print("No error message from bluewalker")
+
     async def run(self):
         bw_path = Path(self._bluewalker)
         if not bw_path.exists():
@@ -72,6 +90,10 @@ class ENObserver:
                 self._sig.clear()
             except asyncio.TimeoutError:
                 pass
+            if not self._stop and not self._is_bluewalker_running():
+                ui.fin()
+                self._print_bluewalker_error()
+                return
 
             now = time.time()
             aged = []
